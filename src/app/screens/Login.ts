@@ -1,16 +1,21 @@
 import { Container, Text, Sprite, Ticker } from "pixi.js";
-
+import { Match } from "./Match";
+import { engine } from "../getEngine";
+import { Input } from "@pixi/ui";
 
 export class Login extends Container {
 
     private Heading: Text;
     private SubHeading: Text;
     private BgImage: Sprite;
-    private box1: Sprite;
-    private UsernameHeading: Text;
-    private box2: Sprite;
-    private PasswordHeading: Text;
     private PlayButton: Sprite;
+    private MusicButton: Sprite;
+
+    private UsernameHeading: Text;
+    private PasswordHeading: Text;
+    
+    private usernameInput: Input;
+    private passwordInput: Input;
 
     private animationTicker: Ticker;
     private baseHeadingY: number = 0;
@@ -18,8 +23,11 @@ export class Login extends Container {
 
     public static assetBundles = ["main"];
     
+    
     constructor() {
         super();
+
+        engine().audio.bgm.play('main/sounds/Outflow.mp3');
 
         this.BgImage = Sprite.from('loginBg.png');
 
@@ -43,31 +51,80 @@ export class Login extends Container {
         });
         this.Heading.anchor.set(0.5);
 
-       
-        this.box1 = Sprite.from('Box1-White.png');
-        this.box1.anchor.set(0.5);
-        this.box1.scale.set(0.75);
 
-        this.box2 = Sprite.from('Box1-White.png');
-        this.box2.anchor.set(0.5);
-        this.box2.scale.set(0.75);
+        // Create username input
+        this.usernameInput = new Input({
+            bg: 'Box1-White.png',
+            placeholder: '',
+            maxLength: 20,
+            align: 'center',
+            textStyle: {
+                fill: '#ffffff',
+                fontSize: 52,
+                fontFamily: 'Handjet',
+                
+            },
+            padding: 10,
+        });
+        this.usernameInput.scale.set(0.8);
+
+        // Create password input
+        this.passwordInput = new Input({
+            bg: 'Box1-White.png',
+            placeholder: '',
+            maxLength: 20,
+            align: 'center',
+            textStyle: {
+                fill: '#ffffff',
+                fontSize: 52,
+                fontFamily: 'Handjet',
+            },
+            padding: 10,
+        });
+        this.passwordInput.scale.set(0.8);
 
         this.PlayButton = Sprite.from('PlayButton.png');
         this.PlayButton.anchor.set(0.5);
         this.PlayButton.scale.set(0.65);
         this.PlayButton.interactive = true;
+
         this.PlayButton.on('pointerdown', () => {
-            console.log('Play button clicked');
+            engine().audio.sfx.play('main/sounds/Blip11.wav');
+            engine().navigation.showScreen(Match);
         });
         this.PlayButton.on('pointerover', () => {
             this.PlayButton.scale.set(0.70);
             this.PlayButton.y += 10;
-            
         });
         this.PlayButton.on('pointerout', () => {
             this.PlayButton.scale.set(0.65);
             this.PlayButton.y -= 10;
         });
+
+        this.MusicButton = Sprite.from('music.png');
+        this.MusicButton.anchor.set(0.5);
+        this.MusicButton.scale.set(0.25);
+        this.MusicButton.interactive = true;
+        this.MusicButton.x = 40;
+        this.MusicButton.y = 40;
+
+        
+        this.MusicButton.on('pointerdown', () => {
+            const currentMusic = engine().audio.bgm.current;
+            if (currentMusic && currentMusic.isPlaying) {
+                this.MusicButton.alpha = 0.5;
+                currentMusic.pause();
+            } else if (currentMusic && currentMusic.paused) {
+                this.MusicButton.alpha = 1;
+                currentMusic.resume();
+            } else {
+                this.MusicButton.alpha = 1;
+                engine().audio.bgm.play('main/sounds/Outflow.mp3');
+            }
+        });
+    
+        
+
 
 
         this.PasswordHeading = new Text({
@@ -77,6 +134,7 @@ export class Login extends Container {
                 fill: '#ffffff',
                 fontSize: 48,
                 fontFamily: 'Handjet',
+                fontWeight: 'bold',
             },
         });
         this.PasswordHeading.anchor.set(0.5);
@@ -86,7 +144,8 @@ export class Login extends Container {
             style: {
                 fill: '#ffffff',
                 fontSize: 48,
-                fontFamily: 'Handjet',
+                fontFamily: 'Handjet',  
+                fontWeight: 'bold',
             },
         });
         this.UsernameHeading.anchor.set(0.5);
@@ -95,9 +154,12 @@ export class Login extends Container {
         this.addChild(this.BgImage);
         this.addChild(this.Heading);
         this.addChild(this.SubHeading);
-        this.addChild(this.box1);
+        this.addChild(this.MusicButton);
+
+        this.addChild(this.usernameInput);
         this.addChild(this.UsernameHeading);
-        this.addChild(this.box2);
+        
+        this.addChild(this.passwordInput);
         this.addChild(this.PasswordHeading);
         this.addChild(this.PlayButton);
         // Initialize animation ticker
@@ -123,29 +185,33 @@ export class Login extends Container {
         this.BgImage.width = width;
         this.BgImage.height = height;
 
+        const centerX = width / 2;
         
-        this.Heading.x = width / 2;
+        // Set pivot points to center the inputs
+        this.usernameInput.pivot.set(this.usernameInput.width / 2, this.usernameInput.height / 2);
+        this.passwordInput.pivot.set(this.passwordInput.width / 2, this.passwordInput.height / 2);
+        
+        this.Heading.x = centerX;
         this.baseHeadingY = height * 0.15;
         this.Heading.y = this.baseHeadingY;
 
-        this.SubHeading.x = width / 2;
+        this.SubHeading.x = centerX;
         this.SubHeading.y = this.baseHeadingY + 100;
 
-        this.box1.x = width / 2;
-        this.box1.y = height / 2.3;
+        this.usernameInput.x = centerX - 49;
+        this.usernameInput.y = height / 2.3;
 
-        // align it above the box1
-        this.UsernameHeading.x = width / 2;
-        this.UsernameHeading.y = this.box1.y - 70;
+        this.UsernameHeading.x = centerX;
+        this.UsernameHeading.y = this.usernameInput.y - 65;
 
-        this.box2.x = width / 2;
-        this.box2.y = this.box1.y + 150;
+        this.passwordInput.x = centerX - 49;
+        this.passwordInput.y = this.usernameInput.y + 170;
 
-        this.PasswordHeading.x = width / 2;
-        this.PasswordHeading.y = this.box2.y - 70;
+        this.PasswordHeading.x = centerX;
+        this.PasswordHeading.y = this.passwordInput.y - 65;
 
-        this.PlayButton.x = width / 2;
-        this.PlayButton.y = this.box2.y + 150;
+        this.PlayButton.x = centerX;
+        this.PlayButton.y = this.passwordInput.y + 150;
 
     }
 
@@ -167,6 +233,8 @@ export class Login extends Container {
     public destroy() {
         
         this.animationTicker.destroy();
+        this.usernameInput.destroy();
+        this.passwordInput.destroy();
         super.destroy();
     }
 }

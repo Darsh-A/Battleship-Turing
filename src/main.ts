@@ -4,6 +4,7 @@ import { LoadScreen } from "./app/screens/LoadScreen";
 import { Login } from "./app/screens/Login";
 import { userSettings } from "./app/utils/userSettings";
 import { CreationEngine } from "./engine/engine";
+import { Assets, Sprite } from "pixi.js";
 
 /**
  * Importing these modules will automatically register there plugins with the engine.
@@ -25,8 +26,16 @@ setEngine(engine);
   // Initialize the user settings
   userSettings.init();
 
-  // Show the load screen
-  await engine.navigation.showScreen(LoadScreen);
+  // Load the main bundle first to ensure cursor asset is available
+  await Assets.loadBundle('main');
+
+  // await engine.navigation.showScreen(LoadScreen);
   // Show the main screen once the load screen is dismissed
   await engine.navigation.showScreen(Login);
+  
+
+
+
+
+
 })();
