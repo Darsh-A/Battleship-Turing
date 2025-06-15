@@ -1,6 +1,7 @@
 import { Container, Sprite, Text } from "pixi.js";
 import { engine } from "../getEngine";
 import { Input } from "@pixi/ui";
+import { Wait } from "./Wait";
 
 export class Match extends Container {
     private BgImage: Sprite;
@@ -90,18 +91,19 @@ export class Match extends Container {
         
         // Add press down animation for CreateButton
         this.CreateButton.on('pointerdown', () => {
-            this.CreateButton.scale.set(1.2); // Scale down
-            this.CreateButton.y += 3; // Move down slightly
+            this.CreateButton.scale.set(1.2);
+            this.CreateButton.y += 3;
         });
         
         this.CreateButton.on('pointerup', () => {
-            this.CreateButton.scale.set(1.3); // Scale back to normal
-            this.CreateButton.y -= 3; // Move back up
+            this.CreateButton.scale.set(1.3);
+            this.CreateButton.y -= 3;
+            engine().navigation.showScreen(Wait);
         });
         
         this.CreateButton.on('pointerupoutside', () => {
-            this.CreateButton.scale.set(1.3); // Scale back to normal
-            this.CreateButton.y -= 3; // Move back up
+            this.CreateButton.scale.set(1.3);
+            this.CreateButton.y -= 3;
         });
 
         this.JoinButton = Sprite.from('Play.svg');
@@ -110,21 +112,22 @@ export class Match extends Container {
         
         // Add press down animation for JoinButton
         this.JoinButton.on('pointerdown', () => {
-            this.JoinButton.scale.set(1.2); // Scale down
-            this.JoinButton.y += 3; // Move down slightly
+            this.JoinButton.scale.set(1.2);
+            this.JoinButton.y += 3;
         });
         
         this.JoinButton.on('pointerup', () => {
-            this.JoinButton.scale.set(1.3); // Scale back to normal
-            this.JoinButton.y -= 3; // Move back up
+            this.JoinButton.scale.set(1.3);
+            this.JoinButton.y -= 3;
+            engine().navigation.showScreen(Wait);
         });
         
         this.JoinButton.on('pointerupoutside', () => {
-            this.JoinButton.scale.set(1.3); // Scale back to normal
-            this.JoinButton.y -= 3; // Move back up
+            this.JoinButton.scale.set(1.3);
+            this.JoinButton.y -= 3;
         });
 
-        // Create matches list container with background
+        
         this.MatchesListContainer = new Container();
         this.MatchesListContainer.scale.set(1.5);
 

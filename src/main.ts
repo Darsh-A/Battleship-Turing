@@ -10,6 +10,7 @@ import { Assets, Sprite } from "pixi.js";
  * Importing these modules will automatically register there plugins with the engine.
  */
 import "@pixi/sound";
+import { GameSetup } from "./app/screens/GameSetup";
 // import "@esotericsoftware/spine-pixi-v8";
 
 // Create a new creation engine instance
@@ -30,8 +31,10 @@ setEngine(engine);
   await Assets.loadBundle('main');
 
   // await engine.navigation.showScreen(LoadScreen);
-  // Show the main screen once the load screen is dismissed
-  await engine.navigation.showScreen(Login);
+  
+  // await engine.navigation.showScreen(Login);
+
+  await engine.navigation.showScreen(GameSetup);
   
 
 
