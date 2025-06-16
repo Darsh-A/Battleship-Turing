@@ -29,3 +29,4 @@ src/manifest.json
 
 # Postgress
 pgdata/
+.contents.txt
