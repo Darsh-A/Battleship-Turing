@@ -18,6 +18,7 @@ fi
 cleanup() {
   echo "\nShutting down Postgres..."
   pg_ctl -D server/pgdata stop
+  rm -rf server/pgdata/
   exit 0
 }
 trap cleanup INT TERM

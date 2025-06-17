@@ -1,6 +1,5 @@
 import {
 	pgTable,
-	uuid,
 	text,
 	timestamp,
 	integer,
@@ -13,9 +12,16 @@ export const players = pgTable("players", {
 	id: text("id").primaryKey(),
 	username: text("username").notNull(),
 	password: text("password").notNull(),
-	lobbyId: uuid("lobby_id")
+	lobbyId: text("lobby_id")
 		.references(() => lobbies.id)
 		.notNull(),
+	totalMatchesPlayed: integer("total_matches_played").notNull().default(0),
+	totalWins: integer("total_wins").notNull().default(0),
+	totalLosses: integer("total_losses").notNull().default(0),
+	totalComponentsDestroyed: integer("total_components_destroyed")
+		.notNull()
+		.default(0),
+	totalMinesTriggered: integer("total_mines_triggered").notNull().default(0),
 });
 
 export const lobbies = pgTable("lobbies", {
@@ -25,7 +31,7 @@ export const lobbies = pgTable("lobbies", {
 });
 
 export const games = pgTable("games", {
-	id: uuid("id").primaryKey().defaultRandom(),
+	id: text("id").primaryKey(),
 	createdAt: timestamp("created_at").defaultNow(),
 	updatedAt: timestamp("updated_at").defaultNow(),
 	status: text("status").notNull(),
@@ -34,10 +40,10 @@ export const games = pgTable("games", {
 
 export const moves = pgTable("moves", {
 	id: serial("id").primaryKey(),
-	gameId: uuid("game_id")
+	gameId: text("game_id")
 		.references(() => games.id)
 		.notNull(),
-	playerId: uuid("player_id")
+	playerId: text("player_id")
 		.references(() => players.id)
 		.notNull(),
 	x: integer("x").notNull(),

@@ -93,16 +93,27 @@ export class Login extends Container {
 		this.PlayButton.interactive = true;
 
 		this.PlayButton.on("pointerdown", () => {
-			const data = {
-				username: this.usernameInput._value.trim(),
-				password: this.passwordInput._value,
-			};
+			const username = this.usernameInput._value.trim();
+			const password = this.passwordInput._value;
+			if (!username || !password) return;
 
-			if (!data.username || !data.password) return;
-			console.log(`${data.username} logged in with password ${data.password}`);
+			console.log(`${username} logged in with password ${password}`);
 			engine().audio.sfx.play("main/sounds/Blip11.wav");
-			engine().navigation.showScreen(Match, { socket, userData: data });
+
+			this.socket.emit("login", { username, password });
 		});
+		this.socket.once("login_success", ({ playerId, stats }) => {
+			engine().navigation.showScreen(Match, {
+				socket: this.socket,
+				userData: {
+					username: this.usernameInput._value,
+					password: this.passwordInput._value,
+				},
+				playerId,
+				stats,
+			});
+		});
+
 		this.PlayButton.on("pointerover", () => {
 			this.PlayButton.scale.set(0.7);
 			this.PlayButton.y += 10;

@@ -2,8 +2,8 @@ import { Container, Sprite, Text } from "pixi.js";
 import { engine } from "../getEngine";
 import { Input } from "@pixi/ui";
 import { Wait } from "./Wait";
-
 import type { Socket } from "socket.io-client";
+import type { PlayerStats } from "../../server/lib/database/players";
 
 interface MatchProps {
 	socket: Socket;
@@ -11,11 +11,15 @@ interface MatchProps {
 		username: string;
 		password: string;
 	};
+	playerId: string;
+	stats: PlayerStats;
 }
 
 export class Match extends Container {
 	private socket: Socket;
 	private userData: { username: string; password: string };
+	private playerId: string;
+	private stats: PlayerStats;
 
 	private BgImage: Sprite;
 	private MusicButton: Sprite;
@@ -33,10 +37,12 @@ export class Match extends Container {
 
 	public static assetBundles = ["main"];
 
-	constructor({ socket, userData }: MatchProps) {
+	constructor({ socket, userData, playerId, stats }: MatchProps) {
 		super();
 		this.socket = socket;
 		this.userData = userData;
+		this.playerId = playerId;
+		this.stats = stats;
 
 		this.BgImage = Sprite.from("loginBg.png");
 
@@ -110,7 +116,19 @@ export class Match extends Container {
 		this.CreateButton.on("pointerup", () => {
 			this.CreateButton.scale.set(1.3);
 			this.CreateButton.y -= 3;
-			engine().navigation.showScreen(Wait);
+			this.socket.emit("create_lobby", {
+				username: this.userData.username,
+				password: this.userData.password,
+				lobbyName: this.CreateInput._value,
+			});
+		});
+		this.socket.on("lobby_already_exists", ({ lobbyName }) => {
+			// [TODO] Add something like a notification or a pop up something.
+			console.log(`[ERROR] Already exists Lobby: ${lobbyName}`);
+		});
+		this.socket.once("lobby_created", ({ lobbyId, playerId }) => {
+			// [TODO] Where do we want to navigate from here?
+			console.log(`[DEBUG] Player ${playerId} joined Lobby: ${lobbyId}`);
 		});
 
 		this.CreateButton.on("pointerupoutside", () => {
@@ -130,7 +148,19 @@ export class Match extends Container {
 		this.JoinButton.on("pointerup", () => {
 			this.JoinButton.scale.set(1.3);
 			this.JoinButton.y -= 3;
-			engine().navigation.showScreen(Wait);
+			this.socket.emit("join_lobby", {
+				username: this.userData.username,
+				password: this.userData.password,
+				lobbyName: this.JoinInput._value,
+			});
+		});
+		this.socket.on("lobby_not_found", ({ lobbyName }) => {
+			// [TODO] Add something like a notification or a pop up something.
+			console.log(`[ERROR] Not found Lobby: ${lobbyName}`);
+		});
+		this.socket.once("lobby_joined", ({ lobbyId, playerId }) => {
+			// [TODO] Where do we want to navigate from here?
+			console.log(`[DEBUG] Player ${playerId} joined Lobby: ${lobbyId}`);
 		});
 
 		this.JoinButton.on("pointerupoutside", () => {
@@ -187,6 +217,32 @@ export class Match extends Container {
 		this.addChild(this.JoinHeading);
 		this.addChild(this.CreateButton);
 		this.addChild(this.JoinButton);
+
+		this.renderStats(stats);
+	}
+	// [TODO] Dorsh take look at this
+	private renderStats(s: PlayerStats) {
+		const entries: [string, number][] = [
+			["Matches Played", s.totalMatchesPlayed],
+			["Wins", s.totalWins],
+			["Losses", s.totalLosses],
+			["Components Destroyed", s.totalComponentsDestroyed],
+			["Mines Triggered", s.totalMinesTriggered],
+		];
+
+		entries.forEach(([label, value], i) => {
+			const txt = new Text({
+				text: `${label}: ${value}`,
+				style: {
+					fill: "#ffffff",
+					fontSize: 24,
+					fontFamily: "Handjet",
+				},
+			});
+			txt.x = 20;
+			txt.y = 80 + i * 30;
+			this.MatchesListContainer.addChild(txt);
+		});
 	}
 
 	public prepare() {}
