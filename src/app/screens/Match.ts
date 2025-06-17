@@ -128,6 +128,9 @@ export class Match extends Container {
 		});
 		this.socket.once("lobby_created", ({ lobbyId, playerId }) => {
 			// [TODO] Where do we want to navigate from here?
+			// [REPLY] To Wait.ts > GameSetup.ts ; Wait is if no person from other team has joined yet.
+			// 	   Once theres more than one person in each team move to Gamesetup.
+			//	   Teams can wait for all their members before starting.
 			console.log(`[DEBUG] Player ${playerId} joined Lobby: ${lobbyId}`);
 		});
 
@@ -160,6 +163,7 @@ export class Match extends Container {
 		});
 		this.socket.once("lobby_joined", ({ lobbyId, playerId }) => {
 			// [TODO] Where do we want to navigate from here?
+			// [REPLY] To Gamesetup.ts as theres no req for Wait.ts
 			console.log(`[DEBUG] Player ${playerId} joined Lobby: ${lobbyId}`);
 		});
 
