@@ -2,8 +2,15 @@ import { Container, Text, Sprite, Ticker } from "pixi.js";
 import { Match } from "./Match";
 import { engine } from "../getEngine";
 import { Input } from "@pixi/ui";
+import type { Socket } from "socket.io-client";
+
+interface LoginProps {
+	socket: Socket;
+}
 
 export class Login extends Container {
+	private socket: Socket;
+
 	private Heading: Text;
 	private SubHeading: Text;
 	private BgImage: Sprite;
@@ -25,8 +32,9 @@ export class Login extends Container {
 
 	public static assetBundles = ["main"];
 
-	constructor() {
+	constructor({ socket }: LoginProps) {
 		super();
+		this.socket = socket;
 
 		engine().audio.bgm.play("main/sounds/Outflow.mp3");
 
@@ -103,14 +111,19 @@ export class Login extends Container {
 
 		this.PlayButton.on("pointerdown", () => {
 			const data = {
-				username: this.usernameInput.text.trim(),
-				password: this.passwordInput.text,
-				lobbyName: this.lobbyInput.text.trim(),
+				username: this.usernameInput._value.trim(),
+				password: this.passwordInput._value,
+				lobbyName: this.lobbyInput._value.trim(),
 			};
+
+			console.log(
+				`${data.username} is trying to join lobby ${data.lobbyName} with password ${data.password}`,
+			);
+
 			if (!data.username || !data.password || !data.lobbyName) return;
-			socket.emit("join_lobby", data);
+			this.socket.emit("join_lobby", data);
 			engine().audio.sfx.play("main/sounds/Blip11.wav");
-			socket.once("lobby_joined", ({ lobbyId }) => {
+			this.socket.once("lobby_joined", ({ lobbyId }) => {
 				engine().navigation.showScreen(Match);
 			});
 		});
@@ -223,6 +236,10 @@ export class Login extends Container {
 			this.passwordInput.width / 2,
 			this.passwordInput.height / 2,
 		);
+		this.lobbyInput.pivot.set(
+			this.lobbyInput.width / 2,
+			this.lobbyInput.height / 2,
+		);
 
 		this.Heading.x = centerX;
 		this.baseHeadingY = height * 0.15;
@@ -246,8 +263,8 @@ export class Login extends Container {
 		this.lobbyInput.x = centerX - 49;
 		this.lobbyInput.y = this.passwordInput.y + 170;
 
-		this.lobbyHeading.x = centerX;
-		this.lobbyHeading.y = this.lobbyInput.y - 65;
+		this.LobbyHeading.x = centerX;
+		this.LobbyHeading.y = this.lobbyInput.y - 65;
 
 		this.PlayButton.x = centerX;
 		this.PlayButton.y = this.lobbyInput.y + 150;
@@ -272,4 +289,3 @@ export class Login extends Container {
 		super.destroy();
 	}
 }
-

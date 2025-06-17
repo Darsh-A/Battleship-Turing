@@ -24,7 +24,7 @@ export const lobbies = pgTable("lobbies", {
 	createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const lobby = pgTable("games", {
+export const games = pgTable("games", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	createdAt: timestamp("created_at").defaultNow(),
 	updatedAt: timestamp("updated_at").defaultNow(),
