@@ -23,9 +23,6 @@ export class Login extends Container {
 	private usernameInput: Input;
 	private passwordInput: Input;
 
-	private LobbyHeading: Text;
-	private lobbyInput: Input;
-
 	private animationTicker: Ticker;
 	private baseHeadingY = 0;
 	private animationTime = 0;
@@ -90,20 +87,6 @@ export class Login extends Container {
 		});
 		this.passwordInput.scale.set(0.8);
 
-		this.lobbyInput = new Input({
-			bg: "Box1-White.png",
-			placeholder: "",
-			maxLength: 20,
-			align: "center",
-			textStyle: {
-				fill: "#ffffff",
-				fontSize: 52,
-				fontFamily: "Handjet",
-			},
-			padding: 10,
-		});
-		this.lobbyInput.scale.set(0.8);
-
 		this.PlayButton = Sprite.from("PlayButton.png");
 		this.PlayButton.anchor.set(0.5);
 		this.PlayButton.scale.set(0.65);
@@ -113,19 +96,12 @@ export class Login extends Container {
 			const data = {
 				username: this.usernameInput._value.trim(),
 				password: this.passwordInput._value,
-				lobbyName: this.lobbyInput._value.trim(),
 			};
 
-			console.log(
-				`${data.username} is trying to join lobby ${data.lobbyName} with password ${data.password}`,
-			);
-
-			if (!data.username || !data.password || !data.lobbyName) return;
-			this.socket.emit("join_lobby", data);
+			if (!data.username || !data.password) return;
+			console.log(`${data.username} logged in with password ${data.password}`);
 			engine().audio.sfx.play("main/sounds/Blip11.wav");
-			this.socket.once("lobby_joined", ({ lobbyId }) => {
-				engine().navigation.showScreen(Match);
-			});
+			engine().navigation.showScreen(Match, { socket, userData: data });
 		});
 		this.PlayButton.on("pointerover", () => {
 			this.PlayButton.scale.set(0.7);
@@ -179,17 +155,6 @@ export class Login extends Container {
 		});
 		this.UsernameHeading.anchor.set(0.5);
 
-		this.LobbyHeading = new Text({
-			text: "Lobby",
-			style: {
-				fill: "#ffffff",
-				fontSize: 48,
-				fontFamily: "Handjet",
-				fontWeight: "bold",
-			},
-		});
-		this.LobbyHeading.anchor.set(0.5);
-
 		this.addChild(this.BgImage);
 		this.addChild(this.Heading);
 		this.addChild(this.SubHeading);
@@ -200,9 +165,6 @@ export class Login extends Container {
 
 		this.addChild(this.passwordInput);
 		this.addChild(this.PasswordHeading);
-
-		this.addChild(this.lobbyInput);
-		this.addChild(this.LobbyHeading);
 
 		this.addChild(this.PlayButton);
 		// Initialize animation ticker
@@ -236,11 +198,6 @@ export class Login extends Container {
 			this.passwordInput.width / 2,
 			this.passwordInput.height / 2,
 		);
-		this.lobbyInput.pivot.set(
-			this.lobbyInput.width / 2,
-			this.lobbyInput.height / 2,
-		);
-
 		this.Heading.x = centerX;
 		this.baseHeadingY = height * 0.15;
 		this.Heading.y = this.baseHeadingY;
@@ -260,14 +217,8 @@ export class Login extends Container {
 		this.PasswordHeading.x = centerX;
 		this.PasswordHeading.y = this.passwordInput.y - 65;
 
-		this.lobbyInput.x = centerX - 49;
-		this.lobbyInput.y = this.passwordInput.y + 170;
-
-		this.LobbyHeading.x = centerX;
-		this.LobbyHeading.y = this.lobbyInput.y - 65;
-
 		this.PlayButton.x = centerX;
-		this.PlayButton.y = this.lobbyInput.y + 150;
+		this.PlayButton.y = this.passwordInput.y + 150;
 	}
 
 	public async show(): Promise<void> {
