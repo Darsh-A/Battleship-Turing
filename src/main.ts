@@ -11,6 +11,8 @@ import { Assets, Sprite } from "pixi.js";
  */
 import "@pixi/sound";
 import { GameSetup } from "./app/screens/GameSetup";
+import { Match } from "./app/screens/Match";
+import { Wait } from "./app/screens/Wait";
 // import "@esotericsoftware/spine-pixi-v8";
 
 // Create a new creation engine instance
