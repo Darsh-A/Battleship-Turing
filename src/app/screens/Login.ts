@@ -3,6 +3,7 @@ import { Match } from "./Match";
 import { engine } from "../getEngine";
 import { Input } from "@pixi/ui";
 import type { Socket } from "socket.io-client";
+import { ErrorPopup } from "../popups/ErrorPopup";
 
 interface LoginProps {
 	socket: Socket;
@@ -93,9 +94,13 @@ export class Login extends Container {
 		this.PlayButton.interactive = true;
 
 		this.PlayButton.on("pointerdown", () => {
-			const username = this.usernameInput._value.trim();
-			const password = this.passwordInput._value;
-			if (!username || !password) return;
+			const username = this.usernameInput.value.trim();
+			const password = this.passwordInput.value;
+			if (!username || !password) {
+				ErrorPopup.setMessage("Please enter a username and password");
+				engine().navigation.presentPopup(ErrorPopup);
+				return;
+			}
 
 			console.log(`${username} logged in with password ${password}`);
 			engine().audio.sfx.play("main/sounds/Blip11.wav");
@@ -106,8 +111,8 @@ export class Login extends Container {
 			engine().navigation.showScreen(Match, {
 				socket: this.socket,
 				userData: {
-					username: this.usernameInput._value,
-					password: this.passwordInput._value,
+					username: this.usernameInput.value,
+					password: this.passwordInput.value,
 				},
 				playerId,
 				stats,

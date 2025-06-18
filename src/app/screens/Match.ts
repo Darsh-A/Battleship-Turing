@@ -3,7 +3,8 @@ import { engine } from "../getEngine";
 import { Input } from "@pixi/ui";
 import { Wait } from "./Wait";
 import type { Socket } from "socket.io-client";
-import type { PlayerStats } from "../../server/lib/database/players";
+import type { PlayerStats } from "../../../server/lib/database/players";
+import { ErrorPopup } from "../popups/ErrorPopup";
 
 interface MatchProps {
 	socket: Socket;
@@ -119,11 +120,11 @@ export class Match extends Container {
 			this.socket.emit("create_lobby", {
 				username: this.userData.username,
 				password: this.userData.password,
-				lobbyName: this.CreateInput._value,
+				lobbyName: this.CreateInput.value,
 			});
 		});
 		this.socket.on("lobby_already_exists", ({ lobbyName }) => {
-			// [TODO] Add something like a notification or a pop up something.
+			ErrorPopup.setMessage(`Lobby ${lobbyName} already exists`);
 			console.log(`[ERROR] Already exists Lobby: ${lobbyName}`);
 		});
 		this.socket.once("lobby_created", ({ lobbyId, playerId }) => {
@@ -154,11 +155,11 @@ export class Match extends Container {
 			this.socket.emit("join_lobby", {
 				username: this.userData.username,
 				password: this.userData.password,
-				lobbyName: this.JoinInput._value,
+				lobbyName: this.JoinInput.value,
 			});
 		});
 		this.socket.on("lobby_not_found", ({ lobbyName }) => {
-			// [TODO] Add something like a notification or a pop up something.
+			ErrorPopup.setMessage(`Lobby ${lobbyName} not found`);
 			console.log(`[ERROR] Not found Lobby: ${lobbyName}`);
 		});
 		this.socket.once("lobby_joined", ({ lobbyId, playerId }) => {
