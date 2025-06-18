@@ -1,46 +1,32 @@
+import { io, Socket } from "socket.io-client";  
 import { setEngine } from "./app/getEngine";
-import { LoadScreen } from "./app/screens/LoadScreen";
-// import { MainScreen } from "./app/screens/main/MainScreen";
+
 import { Login } from "./app/screens/Login";
 import { userSettings } from "./app/utils/userSettings";
 import { CreationEngine } from "./engine/engine";
 import { Assets, Sprite } from "pixi.js";
 
-/**
- * Importing these modules will automatically register there plugins with the engine.
- */
 import "@pixi/sound";
 import { GameSetup } from "./app/screens/GameSetup";
 import { Match } from "./app/screens/Match";
 import { Wait } from "./app/screens/Wait";
-// import "@esotericsoftware/spine-pixi-v8";
 
-// Create a new creation engine instance
+
 const engine = new CreationEngine();
 setEngine(engine);
 
+const SOCKET_URL = "http://localhost:3000";
+const socket: Socket = io(SOCKET_URL, { withCredentials: true });
+engine.setSocket(socket);
+
 (async () => {
-  // Initialize the creation engine instance
-  await engine.init({
-    background: "#1E1E1E",
-    resizeOptions: { minWidth: 768, minHeight: 1024, letterbox: false },
-  });
+	await engine.init({
+		background: "#1E1E1E",
+		resizeOptions: { minWidth: 768, minHeight: 1024, letterbox: false },
+	});
 
-  // Initialize the user settings
-  userSettings.init();
+	userSettings.init();
+	await Assets.loadBundle("main");
 
-  // Load the main bundle first to ensure cursor asset is available
-  await Assets.loadBundle('main');
-
-  // await engine.navigation.showScreen(LoadScreen);
-  
-  // await engine.navigation.showScreen(Login);
-
-  await engine.navigation.showScreen(GameSetup);
-  
-
-
-
-
-
+	await engine.navigation.showScreen(Login, { socket });
 })();
